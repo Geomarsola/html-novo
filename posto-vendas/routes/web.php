@@ -1,27 +1,32 @@
 <?php
 
-use App\Http\Controllers\SaleController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\AuthController;
 
-Route::get('/sales/create', [SaleController::class, 'create']);
-Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
-
-Route::get('/products', [ProductController::class, 'index']);
-
+// Página inicial (welcome) → com botão "Entrar" que leva para login
 Route::get('/', function () {
-    return view('welcome'); // ou outra view que você queira
+    return view('welcome');
 });
 
+// Produtos (será a Dashboard depois do login)
+Route::get('/products', [ProductController::class, 'index'])->middleware('auth')->name('dashboard');
 
-Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegisterForm']);
-Route::post('/register', [App\Http\Controllers\AuthController::class, 'register']);
+// Rotas de vendas
+Route::get('/sales/create', [SaleController::class, 'create'])->middleware('auth');
+Route::post('/sales', [SaleController::class, 'store'])->name('sales.store')->middleware('auth');
 
-Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLoginForm']);
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'login']);
+// Registro
+Route::get('/register', [AuthController::class, 'showRegisterForm']);
+Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
+// Login
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+
+// Logout
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 Auth::routes();
