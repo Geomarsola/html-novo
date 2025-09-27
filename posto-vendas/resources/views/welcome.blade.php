@@ -17,9 +17,9 @@
         <section>
             <h2>Acesse o sistema</h2>
             <ul>
-                <!-- Redireciona direto para /products -->
-                <li><a href="{{ url('/products') }}">Entrar</a></li>
-                <li><a href="{{ url('/register') }}">Cadastrar</a></li>
+                <!-- Corrigido para ir para a página de login -->
+                <li><a href="{{ route('login.form') }}">Entrar</a></li>
+                <li><a href="{{ route('register.form') }}">Cadastrar</a></li>
             </ul>
         </section>
     </main>

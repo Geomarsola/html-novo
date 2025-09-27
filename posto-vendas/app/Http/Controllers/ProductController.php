@@ -3,15 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Product; // Modelo do Produto
+use App\Models\Product;
 
 class ProductController extends Controller
 {
-    public function index() // <- método que retorna a página
+    public function index()
     {
-        $products = Product::all(); // pega todos os produtos do banco
-
-        // Aqui você retorna a view 'products.index' passando os produtos
+        $products = Product::all();
         return view('products.index', compact('products'));
     }
 }

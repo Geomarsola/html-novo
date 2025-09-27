@@ -6,6 +6,7 @@
 <body>
     <h1>Login</h1>
 
+    <!-- Exibir erros de login -->
     @if ($errors->any())
         <div style="color:red;">
             <ul>
@@ -16,18 +17,18 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form action="{{ route('login') }}" method="POST">
         @csrf
 
-        <label for="email">E-mail:</label><br>
-        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus><br><br>
+        <label>E-mail:</label><br>
+        <input type="email" name="email" value="{{ old('email') }}" required><br><br>
 
-        <label for="password">Senha:</label><br>
-        <input id="password" type="password" name="password" required><br><br>
+        <label>Senha:</label><br>
+        <input type="password" name="password" required><br><br>
 
         <button type="submit">Entrar</button>
     </form>
 
-    <p>Não tem conta? <a href="{{ route('register') }}">Registrar</a></p>
+    <p>Não tem conta? <a href="{{ route('register.form') }}">Registrar</a></p>
 </body>
 </html>
