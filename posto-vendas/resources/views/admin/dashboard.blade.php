@@ -7,6 +7,18 @@
 <body>
     <h1>Dashboard do Administrador</h1>
 
+    {{-- Mensagem de sucesso --}}
+    @if(session('success'))
+        <p style="color: green;">{{ session('success') }}</p>
+    @endif
+
+    {{-- Botão cadastrar frentista --}}
+    <p>
+        <a href="{{ route('users.create') }}">
+            <button type="button">+ Cadastrar Frentista</button>
+        </a>
+    </p>
+
     <h2>Produtos Vendidos</h2>
     <table border="1" cellpadding="5" cellspacing="0">
         <thead>

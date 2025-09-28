@@ -20,7 +20,9 @@ class SaleController extends Controller
     public function store(Request $request)
     {
         // Recebe products => [product_id => quantidade]  OR products => [product_id => ['quantity'=>x] ]
+        dd($request);
         $productsInput = $request->input('products', []);
+        dd($productsInput);
 
         if (!is_array($productsInput) || empty($productsInput)) {
             return redirect()->back()->withErrors('Nenhum produto informado.');

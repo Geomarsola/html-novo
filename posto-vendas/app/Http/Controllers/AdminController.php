@@ -11,14 +11,15 @@ use App\Models\User;
 
 class AdminController extends Controller
 {
+    // Dashboard do administrador
     public function dashboard(Request $request)
     {
-        // protege: só admin
+        // Protege: só admin
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             abort(403, 'Acesso negado');
         }
 
-        // 1) Totais por produto (quantidade e valor bruto)
+        // Totais por produto
         $productsSales = SaleItem::select(
                 'product_id',
                 DB::raw('SUM(quantity) as total_quantity'),
@@ -28,7 +29,7 @@ class AdminController extends Controller
             ->with('product')
             ->get();
 
-        // 2) Totais por usuário (frentista)
+        // Totais por usuário
         $usersTotals = DB::table('sale_items')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->join('users', 'sales.user_id', '=', 'users.id')
@@ -37,10 +38,10 @@ class AdminController extends Controller
             ->orderByDesc('total_quantity')
             ->get();
 
-        // 3) Top seller (quem mais vendeu em quantidade)
+        // Top seller
         $topSeller = $usersTotals->first();
 
-        // 4) Totais mensais (ano+mes)
+        // Totais mensais
         $monthly = DB::table('sale_items')
             ->select(DB::raw("YEAR(sale_items.created_at) as year"), DB::raw("MONTH(sale_items.created_at) as month"), DB::raw("SUM(sale_items.quantity * sale_items.price) as total_bruto"), DB::raw("SUM(sale_items.quantity) as total_items"))
             ->groupBy('year','month')
