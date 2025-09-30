@@ -19,11 +19,7 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
-        // Recebe products => [product_id => quantidade]  OR products => [product_id => ['quantity'=>x] ]
-        dd($request);
         $productsInput = $request->input('products', []);
-        dd($productsInput);
-
         if (!is_array($productsInput) || empty($productsInput)) {
             return redirect()->back()->withErrors('Nenhum produto informado.');
         }
@@ -31,18 +27,16 @@ class SaleController extends Controller
         DB::beginTransaction();
         try {
             $sale = Sale::create(['user_id' => Auth::id()]);
-
             $totalValue = 0;
             $totalCommission = 0;
+            $anyProduct = false;
 
-            foreach ($productsInput as $productId => $value) {
-                // aceita dois formatos: quantity direto ou array ['quantity'=>x]
-                $quantity = is_array($value) ? intval($value['quantity'] ?? 0) : intval($value);
-                if ($quantity <= 0) {
-                    continue;
-                }
+            foreach ($productsInput as $productId => $quantity) {
+                $quantity = intval($quantity);
+                if ($quantity <= 0) continue;
+                $anyProduct = true;
 
-                $product = Product::lockForUpdate()->find($productId); // lock para concorrência
+                $product = Product::lockForUpdate()->find($productId);
                 if (!$product) {
                     DB::rollBack();
                     return redirect()->back()->withErrors("Produto (ID {$productId}) não encontrado.");
@@ -53,29 +47,25 @@ class SaleController extends Controller
                     return redirect()->back()->withErrors("Estoque insuficiente para {$product->name}. Disponível: {$product->stock}.");
                 }
 
-                // cria item da venda
                 SaleItem::create([
-                    'sale_id'    => $sale->id,
+                    'sale_id' => $sale->id,
                     'product_id' => $product->id,
-                    'quantity'   => $quantity,
-                    'price'      => $product->price,
+                    'quantity' => $quantity,
+                    'price' => $product->price,
                 ]);
 
-                // atualiza estoque
                 $product->decrement('stock', $quantity);
-
-                // acumula valores
                 $totalValue += $quantity * $product->price;
-                $totalCommission += $quantity * 3; // R$3 por item
+                $totalCommission += $quantity * 3;
+            }
+
+            if (!$anyProduct) {
+                DB::rollBack();
+                return redirect()->back()->withErrors('Informe a quantidade de pelo menos 1 produto.');
             }
 
             DB::commit();
-
-            $message = "Venda registrada com sucesso! Valor bruto: R$ " . number_format($totalValue, 2, ',', '.') .
-                       " | Comissão (sua): R$ " . number_format($totalCommission, 2, ',', '.');
-
-            return redirect()->route('sales.create')->with('success', $message);
-
+            return redirect()->route('sales.create')->with('success', "Venda registrada com sucesso! Valor bruto: R$ " . number_format($totalValue, 2, ',', '.') . " | Comissão: R$ " . number_format($totalCommission, 2, ',', '.'));
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors('Erro ao salvar venda: ' . $e->getMessage());

@@ -6,44 +6,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SaleItem;
-use App\Models\Product;
-use App\Models\User;
 
 class AdminController extends Controller
 {
-    // Dashboard do administrador
-    public function dashboard(Request $request)
+    public function dashboard()
     {
-        // Protege: só admin
+        // Só admin pode acessar
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             abort(403, 'Acesso negado');
         }
 
-        // Totais por produto
-        $productsSales = SaleItem::select(
-                'product_id',
-                DB::raw('SUM(quantity) as total_quantity'),
-                DB::raw('SUM(quantity * price) as total_value')
-            )
+        // Total vendido por produto
+        $productsSales = SaleItem::with('product')
+            ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(quantity * price) as total_value'))
             ->groupBy('product_id')
-            ->with('product')
             ->get();
 
-        // Totais por usuário
+        // Total vendido por frentista
         $usersTotals = DB::table('sale_items')
             ->join('sales', 'sale_items.sale_id', '=', 'sales.id')
             ->join('users', 'sales.user_id', '=', 'users.id')
-            ->select('users.id', 'users.name', DB::raw('SUM(sale_items.quantity) as total_quantity'), DB::raw('SUM(sale_items.quantity * sale_items.price) as total_value'))
+            ->select(
+                'users.id', 
+                'users.name', 
+                DB::raw('SUM(sale_items.quantity) as total_quantity'), 
+                DB::raw('SUM(sale_items.quantity * sale_items.price) as total_value')
+            )
             ->groupBy('users.id', 'users.name')
             ->orderByDesc('total_quantity')
             ->get();
 
-        // Top seller
+        // Top vendedor
         $topSeller = $usersTotals->first();
 
-        // Totais mensais
+        // Total vendido por mês
         $monthly = DB::table('sale_items')
-            ->select(DB::raw("YEAR(sale_items.created_at) as year"), DB::raw("MONTH(sale_items.created_at) as month"), DB::raw("SUM(sale_items.quantity * sale_items.price) as total_bruto"), DB::raw("SUM(sale_items.quantity) as total_items"))
+            ->select(
+                DB::raw("YEAR(sale_items.created_at) as year"),
+                DB::raw("MONTH(sale_items.created_at) as month"),
+                DB::raw("SUM(sale_items.quantity * sale_items.price) as total_bruto"),
+                DB::raw("SUM(sale_items.quantity) as total_items")
+            )
             ->groupBy('year','month')
             ->orderByDesc('year')
             ->orderByDesc('month')

@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Mostrar o formulário de login
+    // Mostrar formulário de login
     public function showLoginForm()
     {
-        return view('auth.login'); // Aponta para resources/views/auth/login.blade.php
+        return view('auth.login');
     }
 
-    // Fazer login
+    // Processar login
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -24,12 +24,13 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Redireciona baseado no role
-            if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            } else {
-                return redirect()->route('products.index');
+            // Frentista vai direto para registrar venda
+            if (Auth::user()->role === 'frentista') {
+                return redirect()->route('sales.create');
             }
+
+            // Admin vai para painel
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->withErrors([
@@ -43,6 +44,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+        return redirect()->route('home');
     }
 }

@@ -5,14 +5,14 @@
     <h1>Login</h1>
 
     <form action="{{ route('login') }}" method="POST">
-    @csrf
-    <label>Email:</label>
-    <input type="email" name="email" required><br><br>
+        @csrf
+        <label>Email:</label>
+        <input type="email" name="email" required><br><br>
 
-    <label>Senha:</label>
-    <input type="password" name="password" required><br><br>
+        <label>Senha:</label>
+        <input type="password" name="password" required><br><br>
 
-    <button type="submit">Entrar</button>
-</form>
+        <button type="submit">Entrar</button>
+    </form>
 </div>
 @endsection

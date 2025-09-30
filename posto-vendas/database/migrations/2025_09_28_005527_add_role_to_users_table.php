@@ -8,14 +8,19 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('frentista'); // padrão é frentista
+            // Adiciona a coluna apenas se não existir
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->string('role')->default('frentista'); // padrão é frentista
+            }
         });
     }
 
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+            if (Schema::hasColumn('users', 'role')) {
+                $table->dropColumn('role');
+            }
         });
     }
 };

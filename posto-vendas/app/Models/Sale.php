@@ -9,7 +9,7 @@ class Sale extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id']; // não precisamos do total salvo para este fluxo
+    protected $fillable = ['user_id'];
 
     public function items()
     {
